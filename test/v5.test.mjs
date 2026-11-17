@@ -1,0 +1,23 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+const root={document:{addEventListener(){}},console};vm.createContext(root);
+for(const name of ['validation','records','locations','ui'])vm.runInContext(fs.readFileSync(new URL('../public/'+name+'.js',import.meta.url),'utf8'),root);
+const R=root.IMCRecords,U=root.IMCUI;
+const input=(name,value,type='text')=>({name,value,type,required:true,tagName:'INPUT',maxLength:300,closest:()=>null,form:{id:'enrollForm',elements:{password:{value}}}});
+test('Search matches padded and Arabic request references plus company and factory names',()=>{const r={id:12,title:'اختبار جودة الخام',company_name:'شركة الأمل للصناعة',factory_names:'مصنع بدر'};for(const q of ['12','IMC-00012','imc 12','IMC-٠٠٠١٢','الأمل','الامل','بدر','جودة الخام'])assert.ok(R.matches(r,q),q);for(const q of ['13','مصنع مفقود','IMC-000123'])assert.equal(R.matches(r,q),false,q)});
+test('Inclusive calendar filters use Cairo dates in winter and daylight saving time',()=>{assert.equal(R.day('2026-11-16T22:30:00Z'),'2026-11-17');assert.equal(R.day('2026-07-01T21:30:00Z'),'2026-07-02');assert.ok(R.within('2026-11-16T22:30:00Z','2026-11-17','2026-11-17'));assert.equal(R.within('2026-11-17T22:00:00Z','2026-11-17','2026-11-17'),false);assert.equal(R.validDay('2026-02-30'),false);assert.equal(R.validDay('2024-02-29'),true)});
+test('Live field validation identifies invalid inputs and accepts corrected values',()=>{for(const [name,bad,good,type]of [['applicant','احمد','احمد محمود','text'],['job','123','مدير المصنع','text'],['email','wrong@','name@example.com','email'],['phone','abc','01112345678','tel'],['tax','123','123456789','text'],['industrial','letters','123/2026','text']]){assert.ok(U.message(input(name,bad,type)),name);assert.equal(U.message(input(name,good,type)),'',name)}});
+test('Passwords accept eight characters without composition requirements and confirm exactly',()=>{for(const value of ['12345678','abcdefgh','@@@@@@@@','ab12@xyz'])assert.equal(U.message(input('password',value,'password')),'');assert.ok(U.message(input('password','1234567','password')));const confirm=input('confirmPassword','abcdefgh','password');confirm.form.elements.password.value='abcdEfgh';assert.ok(U.message(confirm));confirm.value='abcdEfgh';assert.equal(U.message(confirm),'')});
+test('Draft comparison ignores navigation and display changes',()=>{const before={factory:'1',kind:'lab',step:1};assert.equal(R.draftSignature(before),R.draftSignature({...before,step:4,_display:{kind:'Lab request'}}));assert.equal(R.meaningfulDraft({factory:'1',step:1}),false);assert.equal(R.meaningfulDraft(before),true);assert.notEqual(R.draftSignature(before),R.draftSignature({...before,labGoal:'composition'}))});
+test('Location lists cover 27 governorates with separate district and zone collections',()=>{const entries=Object.entries(root.IMCLocations);assert.equal(entries.length,27);assert.equal(entries.reduce((n,[,g])=>n+g.zones.length,0),158);for(const [gov,data]of entries){assert.ok(data.districts.length,gov);assert.equal(new Set(data.zones).size,data.zones.length,gov)}assert.ok(root.IMCLocations['القاهرة'].districts.includes('بدر'));assert.equal(root.IMCLocations['قنا'].districts.includes('مركز إسنا'),false);assert.ok(root.IMCLocations['الأقصر'].districts.includes('إسنا'))});
+test('Sign-in removes initial stored values, then permits normal typing and paste after first focus',()=>{
+ const fields=['email','password'].map(name=>({name,value:'previous unrelated value',defaultValue:'previous unrelated value',listeners:{},addEventListener(name,fn,options){this.listeners[name]=fn;assert.equal(options.once,true)}}));const form={querySelectorAll:()=>fields};U.prepareEmptyLogin(form);
+ for(const field of fields){assert.equal(field.value,'');assert.equal(field.defaultValue,'');assert.equal(field.readOnly,true);field.listeners.focus();assert.equal(field.readOnly,false);field.value='pasted value';assert.equal(field.value,'pasted value')}
+});
+test('Short signup passwords avoid repetitive length feedback while typing but block on blur or continue',()=>{
+ const box={querySelector:()=>null,classList:{toggle(){}},append(){}};root.document.createElement=()=>({dataset:{},setAttribute(){}});
+ const field=input('password','123','password');field.closest=selector=>selector==='[hidden]'?null:box;field.setAttribute=()=>{};field.getAttribute=()=>'';
+ assert.equal(U.validateInput(field,true),true);assert.equal(U.validateInput(field),false);assert.equal(U.message(field),'اكمل كلمة المرور.');field.value='12345678';assert.equal(U.validateInput(field),true);
+});

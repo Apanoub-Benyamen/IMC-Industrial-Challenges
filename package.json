@@ -1,0 +1,17 @@
+{
+  "name": "imc-industrial-challenges",
+  "version": "1.7.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "seed": "node seed.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check server.mjs && node --check db.mjs && node --check migrations.mjs && node --check lifecycle.mjs && node --check public/app.js && node --check public/casework.js && node --check public/workspace.js && node --check public/portal.js && node --check public/ui.js && node --check public/i18n.js"
+  },
+  "description": "IMC Phase 1 industrial challenges platform, establishment registration and centre casework"
+}

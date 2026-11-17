@@ -1,0 +1,33 @@
+IMC Phase 1 — V6 changed/new files over V5
+Merge into the existing project; keep data and local settings.
+Database migration is additive and runs automatically.
+See docs/UPDATE_V6_AR.md and docs/GITHUB_AR.md.
+
+.gitattributes
+.gitignore
+.nvmrc
+README.md
+README_AR.md
+db.mjs
+docs/DATABASE_AR.md
+docs/GITHUB_AR.md
+docs/QA_AR.md
+docs/RESEARCH_V6_AR.md
+docs/UPDATE_V6_AR.md
+migrations.mjs
+package.json
+public/app.js
+public/casework.js
+public/en.json
+public/i18n.js
+public/index.html
+public/portal.js
+public/ui.js
+public/v6.css
+public/workspace.js
+seed.mjs
+server.mjs
+test/casework.test.mjs
+test/migrations.test.mjs
+test/security.test.mjs
+CHANGED_FILES_V6.txt

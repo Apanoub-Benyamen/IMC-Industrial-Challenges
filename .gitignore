@@ -1,0 +1,15 @@
+data/
+uploads/
+backups/
+.env
+.env.*
+!.env.example
+*.sqlite*
+*.db
+node_modules/
+*.log
+*.zip
+coverage/
+public/qa-*
+.DS_Store
+Thumbs.db

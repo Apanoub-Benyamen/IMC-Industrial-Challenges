@@ -1,0 +1,26 @@
+IMC Phase 1 — V5 update over V4
+Merge these files into the existing project; keep data and configuration.
+See docs/UPDATE_V5_AR.md for installation and scope.
+
+README_AR.md
+db.mjs
+docs/LOCATIONS_SOURCES_AR.md
+docs/QA_AR.md
+docs/UPDATE_V5_AR.md
+public/app.js
+public/en.json
+public/form.html
+public/form.js
+public/i18n.js
+public/index.html
+public/locations.js
+public/portal.js
+public/records.js
+public/ui.js
+public/v5.css
+public/workspace.js
+server.mjs
+test/navigation.test.mjs
+test/security.test.mjs
+test/v5.test.mjs
+CHANGED_FILES_V5.txt
